@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+.env
+.cache/
+
+# macOS
+.DS_Store
+
+# Conda/lock
+*.lock
+*.log
+
+# Data/large files
+*.bam
+*.bai
+*.fastq
+*.fa
+*.fai
+*.gz
+*.zip
+*.pdf
+*.png
+
+# Build/output
+test_output/
+example_data/*.gff3
+*.tsv

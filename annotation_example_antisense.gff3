@@ -1,0 +1,4 @@
+Chr1	IsoformX	transcript	268328	269522	.	+	.	ID=isoform_cluster_40;Name=isoform_cluster_40;gene_id=None;confidence=0.675;support_reads=0;coverage=0.899;structural_category=antisense
+Chr1	IsoformX	transcript	1009542	1011174	.	+	.	ID=isoform_cluster_139;Name=isoform_cluster_139;gene_id=None;confidence=0.647;support_reads=0;coverage=0.911;structural_category=antisense
+Chr1	IsoformX	transcript	1514153	1518720	.	-	.	ID=isoform_cluster_161;Name=isoform_cluster_161;gene_id=None;confidence=0.653;support_reads=0;coverage=0.935;structural_category=antisense
+Chr1	IsoformX	transcript	2443935	2445067	.	+	.	ID=isoform_cluster_269;Name=isoform_cluster_269;gene_id=None;confidence=0.775;support_reads=0;coverage=0.901;structural_category=antisense

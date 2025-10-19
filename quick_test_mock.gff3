@@ -1,0 +1,9 @@
+##gff-version 3
+##source IsoformX
+##date 2025-10-19
+chr1	IsoformX	transcript	791743	794000	.	-	.	ID=isoform_cluster_9;Name=isoform_cluster_9;gene_id=GENE_001;confidence=0.496;support_reads=5;coverage=0.645;structural_category=intergenic
+chr1	IsoformX	exon	791743	791864	.	-	.	ID=isoform_cluster_9.exon1;Parent=isoform_cluster_9
+chr1	IsoformX	exon	792302	793027	.	-	.	ID=isoform_cluster_9.exon2;Parent=isoform_cluster_9
+chr1	IsoformX	exon	793028	961953	.	-	.	ID=isoform_cluster_9.exon3;Parent=isoform_cluster_9
+chr1	IsoformX	exon	962041	962782	.	-	.	ID=isoform_cluster_9.exon4;Parent=isoform_cluster_9
+chr1	IsoformX	exon	962783	794000	.	-	.	ID=isoform_cluster_9.exon5;Parent=isoform_cluster_9
