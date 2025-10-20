@@ -46,6 +46,21 @@ class SQANTIAnnotator:
         self.reference_transcripts = reference_transcripts
         self._build_index()
     
+    def _normalize_chromosome(self, chrom: str) -> str:
+        """Normalize chromosome names for consistent matching."""
+        if not chrom:
+            return chrom
+        # Remove common prefixes/suffixes and normalize
+        chrom = chrom.strip()
+        # Handle Chr1 -> 1, 1 -> Chr1, etc.
+        if chrom.startswith('Chr'):
+            return chrom[3:]  # Remove 'Chr' prefix
+        elif chrom.startswith('chr'):
+            return chrom[3:]  # Remove 'chr' prefix
+        elif chrom.isdigit() or chrom in ['X', 'Y', 'MT', 'M']:
+            return f"Chr{chrom}"  # Add 'Chr' prefix
+        return chrom
+    
     def _build_index(self):
         """Build index for efficient lookup."""
         self.transcript_index = {}
@@ -61,16 +76,18 @@ class SQANTIAnnotator:
                 self.gene_index[transcript.gene_id] = []
             self.gene_index[transcript.gene_id].append(transcript)
             
-            # Chromosome index
-            if transcript.chromosome not in self.chromosome_index:
-                self.chromosome_index[transcript.chromosome] = []
-            self.chromosome_index[transcript.chromosome].append(transcript)
+            # Chromosome index (normalized)
+            norm_chrom = self._normalize_chromosome(transcript.chromosome)
+            if norm_chrom not in self.chromosome_index:
+                self.chromosome_index[norm_chrom] = []
+            self.chromosome_index[norm_chrom].append(transcript)
 
     def _overlapping_gene_for_isoform(self, isoform: Isoform) -> Optional[str]:
         """Return the gene_id with the strongest locus overlap on the same chromosome/strand.
         We define gene locus as the union of all transcript spans for that gene.
         """
-        candidates = self.chromosome_index.get(isoform.chromosome, [])
+        norm_chrom = self._normalize_chromosome(isoform.chromosome)
+        candidates = self.chromosome_index.get(norm_chrom, [])
         if not candidates:
             return None
         # Aggregate per gene span (min start, max end) on same strand
@@ -113,8 +130,9 @@ class SQANTIAnnotator:
     
     def _find_best_match(self, isoform: Isoform) -> Optional[ReferenceTranscript]:
         """Find best matching reference transcript."""
-        # Get candidates from same chromosome
-        candidates = self.chromosome_index.get(isoform.chromosome, [])
+        # Get candidates from same chromosome (normalized)
+        norm_chrom = self._normalize_chromosome(isoform.chromosome)
+        candidates = self.chromosome_index.get(norm_chrom, [])
         
         if not candidates:
             return None
@@ -419,7 +437,8 @@ def load_reference_transcripts(gff_file: str) -> List[ReferenceTranscript]:
 
 def annotate_isoforms(
     isoforms: List[Isoform],
-    reference_transcripts: List[ReferenceTranscript]
+    reference_transcripts: List[ReferenceTranscript],
+    verbose: bool = False
 ) -> List[AnnotationResult]:
     """
     Annotate a list of isoforms.
@@ -427,6 +446,7 @@ def annotate_isoforms(
     Args:
         isoforms: List of isoforms to annotate
         reference_transcripts: List of reference transcripts
+        verbose: Print debugging information
     
     Returns:
         List of annotation results
@@ -435,15 +455,24 @@ def annotate_isoforms(
     
     results = []
     for isoform in isoforms:
+        if verbose:
+            print(f"Annotating {isoform.isoform_id} on {isoform.chromosome}:{isoform.start}-{isoform.end} ({isoform.strand})")
+        
         result = annotator.annotate_isoform(isoform)
         results.append(result)
+        
+        if verbose:
+            print(f"  -> {result.structural_category}: {result.subcategory}")
+            if result.reference_transcript:
+                print(f"  -> Reference: {result.reference_transcript.transcript_id}")
     
     return results
 
 
 def annotate_isoforms_with_reference(
     isoforms: List[Isoform],
-    reference_file: str
+    reference_file: str,
+    verbose: bool = False
 ) -> List[AnnotationResult]:
     """
     Annotate isoforms using reference GFF/GTF file.
@@ -451,6 +480,7 @@ def annotate_isoforms_with_reference(
     Args:
         isoforms: List of isoforms to annotate
         reference_file: Path to reference GFF/GTF file
+        verbose: Print debugging information
     
     Returns:
         List of annotation results
@@ -458,5 +488,16 @@ def annotate_isoforms_with_reference(
     # Load reference transcripts
     reference_transcripts = load_reference_transcripts(reference_file)
     
+    if verbose:
+        print(f"Loaded {len(reference_transcripts)} reference transcripts")
+        chrom_counts = {}
+        for t in reference_transcripts:
+            chrom_counts[t.chromosome] = chrom_counts.get(t.chromosome, 0) + 1
+        print(f"Reference chromosomes: {list(chrom_counts.keys())}")
+        print(f"Chromosome counts: {chrom_counts}")
+        
+        isoform_chroms = set(isoform.chromosome for isoform in isoforms)
+        print(f"Isoform chromosomes: {sorted(isoform_chroms)}")
+    
     # Annotate isoforms
-    return annotate_isoforms(isoforms, reference_transcripts)
+    return annotate_isoforms(isoforms, reference_transcripts, verbose=verbose)

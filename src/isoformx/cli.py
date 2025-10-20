@@ -162,7 +162,7 @@ def annotate(input: str, output: str, reference: str, verbose: bool):
         if verbose:
             click.echo(f"Annotating isoforms using reference {reference}...")
         
-        annotation_results = annotate_isoforms_with_reference(isoforms, reference)
+        annotation_results = annotate_isoforms_with_reference(isoforms, reference, verbose=verbose)
         
         # Convert to annotation dictionaries
         annotations = []
